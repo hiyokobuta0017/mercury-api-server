@@ -1,15 +1,12 @@
-const express = require('express');
-const Mercury = require('@postlight/mercury-parser');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
+import Mercury from '@postlight/mercury-parser';
+import fetch from 'node-fetch';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(cors());
-
-app.get('/', (req, res) => {
-  res.send('Mercury Parser API is running!');
-});
 
 app.get('/parser', async (req, res) => {
   const { url } = req.query;
@@ -19,11 +16,17 @@ app.get('/parser', async (req, res) => {
   }
 
   try {
-    const result = await Mercury.parse(url);
-    res.json(result);
-  } catch (error) {
-    console.error('Error parsing URL:', error);
-    res.status(500).json({ error: 'Failed to parse the article' });
+    // Mercury Parserで記事取得
+    const result = await Mercury.parse(url, { contentType: 'html' });
+
+    const title = result.title || 'No title';
+    const author = result.author || 'No author';
+    const content = result.content || 'No content';
+
+    res.json({ title, author, content });
+  } catch (err) {
+    console.error('Parse error:', err);
+    res.status(500).json({ error: 'Failed to parse article.' });
   }
 });
 
