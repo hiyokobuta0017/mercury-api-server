@@ -5,14 +5,12 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// CORSを許可（必要に応じて）
 app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Mercury Parser API is running!');
 });
 
-// /parser?url=... に対応
 app.get('/parser', async (req, res) => {
   const { url } = req.query;
 
@@ -23,8 +21,8 @@ app.get('/parser', async (req, res) => {
   try {
     const result = await Mercury.parse(url);
     res.json(result);
-  } catch (err) {
-    console.error('Parse error:', err);
+  } catch (error) {
+    console.error('Error parsing URL:', error);
     res.status(500).json({ error: 'Failed to parse the article' });
   }
 });
