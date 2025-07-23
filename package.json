@@ -1,17 +1,15 @@
 {
   "name": "mercury-api-server",
   "version": "1.0.0",
-  "description": "Simple Mercury Parser API using Express and @postlight/mercury-parser",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@postlight/mercury-parser": "^2.2.0",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
-  },
-  "engines": {
-    "node": ">=14"
+    "express": "^4.18.2",
+    "@postlight/mercury-parser": "^2.2.0",
+    "node-fetch": "^3.3.2"
   }
 }
