@@ -1,28 +1,27 @@
-import express from 'express';
-import cors from 'cors';
-import Mercury from '@postlight/mercury-parser';
-import fetch from 'node-fetch';
-import { parse as parseContentType } from 'encoding';
-import iconv from 'iconv-lite';
+import express from "express";
+import cors from "cors";
+import Mercury from "@postlight/mercury-parser";
+import fetch from "node-fetch";
+import iconv from "iconv-lite";
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(cors());
 
-app.get('/parser', async (req, res) => {
+app.get("/parser", async (req, res) => {
   const { url } = req.query;
-  if (!url) return res.status(400).json({ error: 'Missing url parameter' });
+  if (!url) return res.status(400).json({ error: "Missing url parameter" });
 
   try {
     // 1) 生のレスポンスを取得（バッファで）
-    const resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const resp = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     const buffer = await resp.arrayBuffer();
-    const ct = resp.headers.get('content-type') || '';
-    
+
     // 2) Content-Type ヘッダーから charset を抽出
+    const ct = resp.headers.get("content-type") || "";
     const match = /charset=([^;]+)/i.exec(ct);
-    const charset = match ? match[1].toLowerCase().trim() : 'utf-8';
+    const charset = match ? match[1].toLowerCase().trim() : "utf-8";
 
     // 3) バッファを適切な文字コードでデコード
     const html = iconv.decode(Buffer.from(buffer), charset);
@@ -32,13 +31,13 @@ app.get('/parser', async (req, res) => {
 
     // 5) 必要なフィールドだけ返却
     res.json({
-      title:  result.title  || '',
-      author: result.author || '',
-      content:result.content|| ''
+      title: result.title || "",
+      author: result.author || "",
+      content: result.content || ""
     });
   } catch (err) {
-    console.error('Parse error:', err);
-    res.status(500).json({ error: 'Failed to parse article.', detail: err.message });
+    console.error("Parse error:", err);
+    res.status(500).json({ error: "Failed to parse article.", detail: err.message });
   }
 });
 
