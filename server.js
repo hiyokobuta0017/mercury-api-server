@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import Mercury from '@postlight/mercury-parser';
 import fetch from 'node-fetch';
+import { parse as parseContentType } from 'encoding';
+import iconv from 'iconv-lite';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -13,19 +15,26 @@ app.get('/parser', async (req, res) => {
   if (!url) return res.status(400).json({ error: 'Missing url parameter' });
 
   try {
-    // ① まずは node-fetch で生の HTML を取得
-    const resp = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-    });
-    const html = await resp.text();
+    // 1) 生のレスポンスを取得（バッファで）
+    const resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const buffer = await resp.arrayBuffer();
+    const ct = resp.headers.get('content-type') || '';
+    
+    // 2) Content-Type ヘッダーから charset を抽出
+    const match = /charset=([^;]+)/i.exec(ct);
+    const charset = match ? match[1].toLowerCase().trim() : 'utf-8';
 
-    // ② Mercury に HTML を直接渡して解析
+    // 3) バッファを適切な文字コードでデコード
+    const html = iconv.decode(Buffer.from(buffer), charset);
+
+    // 4) Mercury Parser に URL と HTML を渡して解析
     const result = await Mercury.parse(url, { html });
 
+    // 5) 必要なフィールドだけ返却
     res.json({
-      title: result.title || '',
+      title:  result.title  || '',
       author: result.author || '',
-      content: result.content || ''
+      content:result.content|| ''
     });
   } catch (err) {
     console.error('Parse error:', err);
