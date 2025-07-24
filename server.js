@@ -10,23 +10,26 @@ app.use(cors());
 
 app.get('/parser', async (req, res) => {
   const { url } = req.query;
-
-  if (!url) {
-    return res.status(400).json({ error: 'Missing url parameter' });
-  }
+  if (!url) return res.status(400).json({ error: 'Missing url parameter' });
 
   try {
-    // Mercury Parserで記事取得
-    const result = await Mercury.parse(url, { contentType: 'html' });
+    // ① まずは node-fetch で生の HTML を取得
+    const resp = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+    });
+    const html = await resp.text();
 
-    const title = result.title || 'No title';
-    const author = result.author || 'No author';
-    const content = result.content || 'No content';
+    // ② Mercury に HTML を直接渡して解析
+    const result = await Mercury.parse(url, { html });
 
-    res.json({ title, author, content });
+    res.json({
+      title: result.title || '',
+      author: result.author || '',
+      content: result.content || ''
+    });
   } catch (err) {
     console.error('Parse error:', err);
-    res.status(500).json({ error: 'Failed to parse article.' });
+    res.status(500).json({ error: 'Failed to parse article.', detail: err.message });
   }
 });
 
