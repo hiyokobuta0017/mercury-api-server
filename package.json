@@ -1,6 +1,7 @@
 {
   "name": "mercury-api-server",
   "version": "1.0.0",
+  "description": "A simple Mercury Parser API server using Express and @postlight/mercury-parser",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -10,6 +11,12 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "@postlight/mercury-parser": "^2.2.0",
-    "node-fetch": "^3.3.2"
-  }
+    "node-fetch": "^3.3.2",
+    "iconv-lite": "^0.6.3",
+    "encoding": "^0.1.13"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
 }
